@@ -4,7 +4,7 @@ import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export async function handleRequest(request, env, ctx) {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  url.pathname = '/index.html';
+  url.pathname = './client/index.html';
 
   if (request.method === 'POST' && pathname === '/api/join') {
     return handleJoin(request, env);
