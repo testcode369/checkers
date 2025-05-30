@@ -1,5 +1,5 @@
 import { handleJoin, handleAutomatch, handleInvite, handleAcceptInvite } from './matchmaker.js';
-import indexHtml from './client/index.html';
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 
 export async function handleRequest(request, env, ctx) {
   const url = new URL(request.url);
@@ -22,6 +22,15 @@ export async function handleRequest(request, env, ctx) {
       headers: { 'Content-Type': 'text/html' },
     });
   }
+  try {
+    return await getAssetFromKV(
+      { request, waitUntil: ctx.waitUntil },
+      { ASSET_NAMESPACE: env.__STATIC_CONTENT }
+    );
+  } catch (err) {
+    return new Response('Not Found', { status: 404 });
+  }
+
 
 
   return new Response('Not found', { status: 404 });
