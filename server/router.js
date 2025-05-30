@@ -18,22 +18,17 @@ export async function handleRequest(request, env, ctx) {
   if (request.method === 'GET' && pathname === '/api/accept-invite') {
     return handleAcceptInvite(request, env);
   }
-    try {
-    return await getAssetFromKV(
-      { request, waitUntil: ctx.waitUntil },
-      {
-        mapRequestToAsset: (req) => {
-          let url = new URL(req.url);
+  if (request.method === 'GET' && pathname === '/') {
+    //return handleAcceptInvite(request, env);
+    let url = new URL(request.url);
           if (url.pathname === "/" || !url.pathname.includes('.')) {
             url.pathname = "/index.html";
           }
-          return new Request(url.toString(), req);
-        },
-      }
-    );
-  } catch (err) {
-    return new Response('Not Found', { status: 404 });
+          return new Request(url.toString(), request);
   }
+   
+    return new Response('Not Found', { status: 404 });
+  
 
 
 
