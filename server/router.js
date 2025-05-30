@@ -25,8 +25,15 @@ export async function handleRequest(request, env, ctx) {
       { ASSET_NAMESPACE: env.__STATIC_CONTENT }
     );
   } catch (err) {
-   
-    return new Response('Not Found 2', { status: 404 });
+
+    const url = new URL(request.url);
+    url.pathname = '/index.html';
+    
+   // return new Response('Not Found 2', { status: 404 });
+    return await getAssetFromKV(
+      { request, waitUntil: ctx.waitUntil },
+      { ASSET_NAMESPACE: env.__STATIC_CONTENT }
+    );
   }
 
 
