@@ -4,7 +4,7 @@ import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export async function handleRequest(request, env, ctx) {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  url.pathname = './client/index.html';
+ 
 
   if (request.method === 'POST' && pathname === '/api/join') {
     return handleJoin(request, env);
@@ -25,6 +25,8 @@ export async function handleRequest(request, env, ctx) {
       { ASSET_NAMESPACE: env.__STATIC_CONTENT }
     );
   } catch (err) {
+    const url = new URL(request.url);
+    url.pathname ='/index.html';
     return new Response('Not Found 2', { status: 404 });
   }
 
