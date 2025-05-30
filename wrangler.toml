@@ -1,5 +1,6 @@
 name = "checkers-game"
 type = "javascript"
+account_id = "8e036c891eacfc16f818200990311addc4571"
 main = "server/index.js"
 compatibility_date = "2024-06-01"
 workers_dev = true
