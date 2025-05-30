@@ -9,6 +9,7 @@ workers_dev = true
 
 [site]
 bucket = "./client"
+entry-point = "worker"
 
 
 # Durable Object bindings
