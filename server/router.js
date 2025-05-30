@@ -17,11 +17,7 @@ export async function handleRequest(request, env, ctx) {
   if (request.method === 'GET' && pathname === '/api/accept-invite') {
     return handleAcceptInvite(request, env);
   }
-  if (pathname === '/' && request.method === 'GET') {
-    return new Response(indexHtml, {
-      headers: { 'Content-Type': 'text/html' },
-    });
-  }
+
   try {
     return await getAssetFromKV(
       { request, waitUntil: ctx.waitUntil },
