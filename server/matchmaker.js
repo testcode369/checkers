@@ -1,31 +1,30 @@
+// matchmaker.js
+
 import { signToken, verifyToken, generateToken } from './utils.js';
 
 export class Matchmaker {
   constructor(env) {
-    this.env = env; // Environment variables, including SECRET
-    this.rooms = new Map(); // In-memory room tracking (for demo)
-    this.playerRooms = new Map(); // playerId => roomId map
+    this.env = env; // Contains secrets and bindings
+    this.rooms = new Map(); // In-memory room tracking
+    this.playerRooms = new Map(); // playerId => roomId
   }
 
-  // Simple automatch: pair waiting players or create new room
+  // Pair two players or create a new room
   async automatch(playerId) {
-    // Find a waiting player
     for (const [otherId, roomId] of this.playerRooms.entries()) {
       if (otherId !== playerId) {
-        // Pair players
         this.playerRooms.set(playerId, roomId);
         return { room: roomId, opponent: otherId };
       }
     }
 
-    // No waiting player, create new room
     const roomId = `room-${generateToken(8)}`;
     this.rooms.set(roomId, [playerId]);
     this.playerRooms.set(playerId, roomId);
     return { room: roomId, opponent: null };
   }
 
-  // Generate an invite link with signed token
+  // Create an invite token and return the invite URL
   async createInvite(playerId) {
     const data = {
       playerId,
@@ -35,35 +34,81 @@ export class Matchmaker {
 
     const token = await signToken(data, this.env.SECRET);
 
-    // Example invite link format, adjust domain accordingly
     const inviteLink = `https://yourdomain.example.com/join?invite=${encodeURIComponent(token)}`;
-
     return { inviteLink };
   }
 
-  // Accept invite link by verifying token and returning room info
-  async acceptInvite(token) {
+  // Accept an invite token, validate it, and assign room
+  async acceptInvite(token, acceptorId) {
     const data = await verifyToken(token, this.env.SECRET);
     if (!data) {
       throw new Error('Invalid or tampered invite token');
     }
 
     const { playerId: inviterId, issuedAt } = data;
-
-    // Optional: check expiry (e.g., 1 hour)
-    const maxAgeMs = 60 * 60 * 1000;
+    const maxAgeMs = 60 * 60 * 1000; // 1 hour
     if (Date.now() - issuedAt > maxAgeMs) {
       throw new Error('Invite token expired');
     }
 
-    // Create or join a room for inviter and new player
     const roomId = this.playerRooms.get(inviterId) || `room-${generateToken(8)}`;
     this.rooms.set(roomId, [inviterId]);
     this.playerRooms.set(inviterId, roomId);
-
-    // For the acceptor, assign same room
-    this.playerRooms.set(data.acceptorId, roomId);
+    this.playerRooms.set(acceptorId, roomId);
 
     return { room: roomId, opponent: inviterId };
+  }
+}
+
+// --- HANDLERS for router.js ---
+
+export async function handleJoin(request, env) {
+  const { playerId } = await request.json();
+  if (!playerId) return new Response('Missing playerId', { status: 400 });
+
+  return new Response(JSON.stringify({ message: 'Joined successfully' }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function handleAutomatch(request, env) {
+  const { playerId } = await request.json();
+  if (!playerId) return new Response('Missing playerId', { status: 400 });
+
+  const mm = new Matchmaker(env);
+  const result = await mm.automatch(playerId);
+  return new Response(JSON.stringify(result), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function handleInvite(request, env) {
+  const { playerId } = await request.json();
+  if (!playerId) return new Response('Missing playerId', { status: 400 });
+
+  const mm = new Matchmaker(env);
+  const result = await mm.createInvite(playerId);
+  return new Response(JSON.stringify(result), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function handleAcceptInvite(request, env) {
+  const url = new URL(request.url);
+  const token = url.searchParams.get('invite');
+  const acceptorId = url.searchParams.get('playerId');
+
+  if (!token || !acceptorId) {
+    return new Response('Missing token or playerId', { status: 400 });
+  }
+
+  try {
+    const mm = new Matchmaker(env);
+    const result = await mm.acceptInvite(token, acceptorId);
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (err) {
+    return new Response(err.message, { status: 400 });
   }
 }
