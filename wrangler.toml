@@ -25,7 +25,7 @@ new_classes = [ "Room", "Sync", "Spectator" ]
 
 # KV binding for static files (handled automatically when using [site])
 [[kv_namespaces]]
-binding = "__checkers-game-workers_sites_assets"
+binding = "__STATIC_CONTENT"
 id = "5a12ef00ae314d74bb3d3124269350e1"  # Let Wrangler manage it, don't manually add ID unless you know it
 
 # KV binding (used for invite tokens, etc.)
