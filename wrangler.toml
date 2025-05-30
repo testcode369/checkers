@@ -31,6 +31,9 @@ binding = "DB"
 database_name = "checkers-db"
 database_id = "d585fdfe-5228-4ad4-9edd-17645740c9d5"  # Replace with your actual D1 database ID
 
+[site]
+bucket = "./client"
+
 # Build options
 [build]
 command = "npm install"
