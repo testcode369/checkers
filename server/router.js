@@ -24,7 +24,7 @@ export async function handleRequest(request, env, ctx) {
       { ASSET_NAMESPACE: env.__STATIC_CONTENT }
     );
   } catch (err) {
-    return new Response('Not Found', { status: 404 });
+    return new Response('Not Found 2', { status: 404 });
   }
 
 
