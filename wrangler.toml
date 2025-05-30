@@ -1,11 +1,14 @@
 name = "checkers-game"
+type = "javascript"
 main = "server/index.js"
 compatibility_date = "2024-06-01"
 workers_dev = true
 
+
+
 [site]
 bucket = "./client"
-main = "server/index.js"
+
 
 # Durable Object bindings
 [[durable_objects.bindings]]
