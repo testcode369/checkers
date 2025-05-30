@@ -26,7 +26,7 @@ export async function handleRequest(request, env, ctx) {
     );
   } catch (err) {
     const url = new URL(request.url);
-    url.pathname ='/index.html';
+    url.pathname ='./client/index.html';
    // return new Response('Not Found 2', { status: 404 });
   }
 
