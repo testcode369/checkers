@@ -26,14 +26,9 @@ export async function handleRequest(request, env, ctx) {
     );
   } catch (err) {
 
-    const url = new URL(request.url);
-    url.pathname = './client/index.html';
-    
-   // return new Response('Not Found 2', { status: 404 });
-    return await getAssetFromKV(
-      { request, waitUntil: ctx.waitUntil },
-      { ASSET_NAMESPACE: env.__STATIC_CONTENT }
-    );
+   
+   return new Response('Not Found 2', { status: 404 });
+   
   }
 
 
