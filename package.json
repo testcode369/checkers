@@ -22,7 +22,9 @@
   "license": "MIT",
   "dependencies": {
     "itty-router": "^3.0.7",
-    "nanoid": "^4.0.2"
+    "nanoid": "^4.0.2",
+    "@cloudflare/kv-asset-handler": "0.4.0"
+    
   },
   "devDependencies": {
     "wrangler": "4"
