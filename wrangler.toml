@@ -19,14 +19,13 @@ class_name = "Spectator"
 # KV binding (used for invite tokens, etc.)
 [[kv_namespaces]]
 binding = "INVITES"
-id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Replace with your actual KV namespace ID
-preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Optional: separate preview namespace
+id = "a32e202fea9e402b8b0557d6d73321d5"  # Replace with your actual KV namespace ID
 
 # D1 binding (used for storing player data, game state, etc.)
 [[d1_databases]]
 binding = "DB"
 database_name = "checkers-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Replace with your actual D1 database ID
+database_id = "d585fdfe-5228-4ad4-9edd-17645740c9d5"  # Replace with your actual D1 database ID
 
 # Build options
 [build]
