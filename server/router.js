@@ -18,7 +18,7 @@ export async function handleRequest(request, env, ctx) {
   if (request.method === 'GET' && pathname === '/api/accept-invite') {
     return handleAcceptInvite(request, env);
   }
-  if (request.method === 'GET' && pathname === '/') {
+  if (request.method === 'POST' && pathname === '/') {
     //return handleAcceptInvite(request, env);
     let url = new URL(request.url);
           if (url.pathname === "/" || !url.pathname.includes('.')) {
