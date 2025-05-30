@@ -5,7 +5,7 @@ workers_dev = true
 
 [site]
 bucket = "./client"
-entry-point = "server"
+main = "server/index.js"
 
 # Durable Object bindings
 [[durable_objects.bindings]]
