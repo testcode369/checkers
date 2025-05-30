@@ -22,7 +22,7 @@ export async function handleRequest(request, env, ctx) {
     //return handleAcceptInvite(request, env);
     let url = new URL(request.url);
           if (url.pathname === "/" || !url.pathname.includes('.')) {
-            url.pathname = "./index.html";
+            url.pathname = "/index.html";
           }
           return new Request(url.toString(), request);
   }
