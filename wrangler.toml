@@ -3,10 +3,6 @@ main = "server/index.js"
 compatibility_date = "2024-06-01"
 workers_dev = true
 
-[[migrations]]
-tag = "v1"
-new_classes = [ "Room", "Sync", "Spectator" ]
-
 # Durable Object bindings
 [[durable_objects.bindings]]
 name = "ROOM"
@@ -19,6 +15,10 @@ class_name = "Sync"
 [[durable_objects.bindings]]
 name = "SPECTATOR"
 class_name = "Spectator"
+
+[[migrations]]
+tag = "v1"
+new_classes = [ "Room", "Sync", "Spectator" ]
 
 # KV binding (used for invite tokens, etc.)
 [[kv_namespaces]]
