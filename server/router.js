@@ -20,16 +20,22 @@ export async function handleRequest(request, env, ctx) {
   }
 
   try {
+    // Try to get the actual asset
     return await getAssetFromKV(
       { request, waitUntil: ctx.waitUntil },
       { ASSET_NAMESPACE: env.__STATIC_CONTENT }
     );
   } catch (err) {
-
-   
-   return new Response('Not Found 2', { status: 404 });
-   
+    // If it fails (e.g. 404), serve index.html as SPA fallback
+    return await getAssetFromKV(
+      {
+        request: new Request(`${new URL(request.url).origin}/index.html`, request),
+        waitUntil: ctx.waitUntil
+      },
+      { ASSET_NAMESPACE: env.__STATIC_CONTENT }
+    );
   }
+
 
 
 }
