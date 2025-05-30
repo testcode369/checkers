@@ -1,7 +1,7 @@
 // server/index.js
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import { handleRequest } from './router.js';
 
-// Add dummy Durable Object classes to satisfy Wrangler
 export class Room {
   constructor(state, env) {
     this.state = state;
@@ -35,12 +35,20 @@ export class Spectator {
   }
 }
 
-// Default Worker export
 export default {
-  fetch(request, env, ctx) {
-    return handleRequest(request, env, ctx);
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // Try to serve static files first
+    try {
+      const asset = await getAssetFromKV({ request, waitUntil: ctx.waitUntil }, { ASSET_NAMESPACE: env.__STATIC_CONTENT });
+      return asset;
+    } catch (err) {
+      // If static asset not found, fallback to router
+      return handleRequest(request, env, ctx);
+    }
   },
-  // Required Durable Object exports
+
   Room,
   Sync,
   Spectator
