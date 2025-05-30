@@ -32,6 +32,4 @@ export async function handleRequest(request, env, ctx) {
   }
 
 
-
-  return new Response('Not found', { status: 404 });
 }
