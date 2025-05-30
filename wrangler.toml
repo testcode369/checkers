@@ -5,6 +5,7 @@ workers_dev = true
 
 [site]
 bucket = "./client"
+entry-point = "server"
 
 # Durable Object bindings
 [[durable_objects.bindings]]
