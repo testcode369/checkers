@@ -3,6 +3,9 @@ main = "server/index.js"
 compatibility_date = "2024-06-01"
 workers_dev = true
 
+[site]
+bucket = "./client"
+
 # Durable Object bindings
 [[durable_objects.bindings]]
 name = "ROOM"
@@ -19,6 +22,11 @@ class_name = "Spectator"
 [[migrations]]
 tag = "v1"
 new_classes = [ "Room", "Sync", "Spectator" ]
+
+# KV binding for static files (handled automatically when using [site])
+[[kv_namespaces]]
+binding = "__STATIC_CONTENT"
+id = "auto"  # Let Wrangler manage it, don't manually add ID unless you know it
 
 # KV binding (used for invite tokens, etc.)
 [[kv_namespaces]]
@@ -40,6 +48,3 @@ command = "npm install"
 port = 8787
 local_protocol = "http"
 ip = "127.0.0.1"
-
-[site]
-bucket = "./client"
