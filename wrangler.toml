@@ -1,0 +1,39 @@
+name = "checkers-game"
+main = "server/index.js"
+compatibility_date = "2024-06-01"
+workers_dev = true
+
+# Durable Object bindings
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "Room"
+
+[[durable_objects.bindings]]
+name = "SYNC"
+class_name = "Sync"
+
+[[durable_objects.bindings]]
+name = "SPECTATOR"
+class_name = "Spectator"
+
+# KV binding (used for invite tokens, etc.)
+[[kv_namespaces]]
+binding = "INVITES"
+id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Replace with your actual KV namespace ID
+preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Optional: separate preview namespace
+
+# D1 binding (used for storing player data, game state, etc.)
+[[d1_databases]]
+binding = "DB"
+database_name = "checkers-db"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Replace with your actual D1 database ID
+
+# Build options
+[build]
+command = "npm install"
+
+# Dev environment config
+[dev]
+port = 8787
+local_protocol = "http"
+ip = "127.0.0.1"
