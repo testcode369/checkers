@@ -23,8 +23,7 @@ class_name = "Spectator"
 tag = "v1"
 new_classes = [ "Room", "Sync", "Spectator" ]
 
-[vars]
-__STATIC_CONTENT = "__checkers-game-workers_sites_assets"
+
 
 # KV binding for static files (handled automatically when using [site])
 [[kv_namespaces]]
