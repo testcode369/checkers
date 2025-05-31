@@ -1,6 +1,6 @@
 import { Router } from 'itty-router';
 import { nanoid } from 'nanoid';
-import { encodeInviteToken } from '/client/crypto.js';
+import { encodeInviteToken } from './crypto.js';
 
 const router = Router();
 
