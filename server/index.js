@@ -103,7 +103,7 @@ router.get('/spectate/:playerId', async ({ params }, env) => {
     });
   }
 
-  const url = `wss://yourdomain.com/room/${roomId}?role=spectator`;
+  const url = `wss://multiplayercheckers.online/room/${roomId}?role=spectator`;
 
   return new Response(JSON.stringify({ spectatorUrl: url }), {
     headers: { 'Content-Type': 'application/json' }
