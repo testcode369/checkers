@@ -305,4 +305,3 @@ export class Room {
   }
 }
 
-export { Room };
