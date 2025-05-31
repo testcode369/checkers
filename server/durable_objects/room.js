@@ -304,3 +304,5 @@ export class Room {
     this.sockets.clear();
   }
 }
+
+export { Room };
