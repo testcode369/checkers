@@ -2,8 +2,8 @@ import { Router } from 'itty-router';
 import { nanoid } from 'nanoid';
 import { encodeInviteToken } from './crypto.js';
 import { Room } from './durable_objects/room.js';
-import { Sync } from './durable_objects/sync.js';
-import { Spectator } from './durable_objects/spectator.js';
+import { SyncManager } from './durable_objects/sync.js';
+import { SpectatorManager } from './durable_objects/spectator.js';
 
 const router = Router();
 
@@ -130,7 +130,7 @@ router.post('/end', async (req, env) => {
 
 router.all('*', () => new Response('Not Found', { status: 404 }));
 
-export { Room, Sync, Spectator };
+export { Room, SyncManager, SpectatorManager };
 
 export default {
   fetch: (req, env, ctx) => router.handle(req, env, ctx)
