@@ -131,12 +131,13 @@ router.post('/end', async (req, env) => {
 router.all('*', () => new Response('Not Found', { status: 404 }));
 
 
-
-export default {
-  fetch: (req, env, ctx) => router.handle(req, env, ctx),
-  durable_object_namespace: {
+export {
     Room,
     SyncManager,
     SpectatorManager
-  }
+  }; 
+
+export default {
+  fetch: (req, env, ctx) => router.handle(req, env, ctx),
+
 };
