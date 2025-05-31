@@ -18,11 +18,11 @@
       },
       {
         "name": "SYNC",
-        "class_name": "Sync"
+        "class_name": "SyncManager"
       },
       {
         "name": "SPECTATOR",
-        "class_name": "Spectator"
+        "class_name": "SpectatorManager"
       }
     ]
   },
@@ -30,7 +30,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_classes": ["Room", "Sync", "Spectator"]
+      "new_classes": ["Room", "SyncManager", "SpectatorManager"]
     }
   ],
 
