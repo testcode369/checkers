@@ -20,5 +20,5 @@ compatibility_date = "2024-06-01"
 
 # If you have environment-specific settings
 [env.production]
-zone_id = "your-zone-id"
-route = "https://checkers-game.example.com/*"
+zone_id = "0eed3778cd8a6233bc5f6b2f4af96185"
+route = "https://multiplayercheckers.online/*"
