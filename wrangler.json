@@ -31,13 +31,6 @@
     {
       "tag": "v1",
       "new_classes": ["Room", "SyncManager", "SpectatorManager"]
-    },
-    {
-       "tag": "v2",
-      "renamed_classes": [
-        { "from": "Spectator", "to": "SpectatorManager" },
-         { "from": "Sync", "to": "SyncManager" }
-      ]
     }
   ],
 
