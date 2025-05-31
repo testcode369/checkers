@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkers Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+    }
+
+    #main, #game {
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    #board {
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      user-select: none;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .black { background: #444; }
+    .white { background: #eee; }
+
+    /* Highlight selected piece */
+    .cell.selected {
+      outline: 3px solid yellow;
+      outline-offset: -3px;
+    }
+
+    /* Highlight valid move cells */
+    .cell.valid-move::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 0, 0.6);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .piece {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+      will-change: transform;
+    }
+
+    .piece.moving {
+      transform: scale(1.3);
+    }
+
+    .red { background: red; }
+    .blue { background: blue; }
+
+    /* Kings have gold border */
+    .piece.king {
+      border: 2px solid gold;
+      box-sizing: border-box;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="main">
+    <h1>Checkers</h1>
+    <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off" />
+    <button class="btn" id="joinBtn">Join</button>
+    <div id="joinOptions" style="display:none;">
+      <button class="btn" id="automatchBtn">Automatch</button>
+      <button class="btn" id="inviteBtn">Invite Friend</button>
+    </div>
+  </div>
+
+  <div id="game" style="display:none;">
+    <h2 id="playerNameDisplay"></h2>
+    <div id="board"></div>
+    <div>
+      <button class="btn" id="spectatorBtn">Spectator Mode</button>
+      <button class="btn" id="newSameBtn" disabled>New Game (Same Player)</button>
+      <button class="btn" id="newDiffBtn" disabled>New Game (Different Player)</button>
+      <button class="btn" id="endBtn">End Game</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // ----- Game State Variables -----
+    let playerId = null;
+    let roomId = null;
+    let ws = null;
+    let boardState = [];
+    let selectedPiece = null;
+    let currentPlayerColor = null;
+    let possibleMoves = [];
+
+    const RED = 'r', BLUE = 'b', RED_KING = 'R', BLUE_KING = 'B';
+
+    // ----- DOM Elements -----
+    const joinBtn = document.getElementById('joinBtn');
+    const nameInput = document.getElementById('nameInput');
+    const playerNameDisplay = document.getElementById('playerNameDisplay');
+    const joinOptions = document.getElementById('joinOptions');
+    const automatchBtn = document.getElementById('automatchBtn');
+    const inviteBtn = document.getElementById('inviteBtn');
+    const gameDiv = document.getElementById('game');
+    const statusDiv = document.getElementById('status');
+    const newSameBtn = document.getElementById('newSameBtn');
+    const newDiffBtn = document.getElementById('newDiffBtn');
+    const endBtn = document.getElementById('endBtn');
+    const board = document.getElementById('board');
+
+    // Focus input on page load
+    window.onload = () => nameInput.focus();
+
+    // ----- Setup -----
+    function initializeBoardState() {
+      boardState = Array.from({ length: 8 }, () => Array(8).fill(null));
+      for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 8; x++) {
+          if ((x + y) % 2) boardState[y][x] = BLUE;
+        }
+      }
+      for (let y = 5; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          if ((x + y) % 2) boardState[y][x] = RED;
+        }
+      }
+    }
+
+    // Returns all valid moves for a piece at (x,y)
+    function getValidMoves(x, y) {
+      const piece = boardState[y][x];
+      if (!piece) return [];
+
+      const moves = [];
+      const isKing = [RED_KING, BLUE_KING].includes(piece);
+      const directions = [];
+
+      if (piece.toLowerCase() === RED) {
+        directions.push([-1, -1], [1, -1]);
+        if (isKing) directions.push([-1, 1], [1, 1]);
+      } else if (piece.toLowerCase() === BLUE) {
+        directions.push([-1, 1], [1, 1]);
+        if (isKing) directions.push([-1, -1], [1, -1]);
+      }
+
+      // Check simple moves
+      for (const [dx, dy] of directions) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (inBounds(nx, ny) && !boardState[ny][nx]) {
+          moves.push([nx, ny]);
+        }
+      }
+
+      // Check captures
+      for (const [dx, dy] of directions) {
+        const nx = x + dx;
+        const ny = y + dy;
+        const nx2 = x + 2 * dx;
+        const ny2 = y + 2 * dy;
+
+        if (inBounds(nx2, ny2) && !boardState[ny2][nx2]) {
+          const midPiece = boardState[ny][nx];
+          if (midPiece && midPiece.toLowerCase() !== piece.toLowerCase()) {
+            moves.push([nx2, ny2]);
+          }
+        }
+      }
+
+      return moves;
+    }
+
+    function inBounds(x, y) {
+      return x >= 0 && x < 8 && y >= 0 && y < 8;
+    }
+
+    function createBoard() {
+      board.innerHTML = '';
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          const cell = document.createElement('div');
+          cell.className = `cell ${(x + y) % 2 === 0 ? 'white' : 'black'}`;
+
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+
+          // Highlight selected
+          if (selectedPiece && selectedPiece[0] === x && selectedPiece[1] === y) {
+            cell.classList.add('selected');
+          }
+
+          // Highlight valid moves
+          if (possibleMoves.some(([mx, my]) => mx === x && my === y)) {
+            cell.classList.add('valid-move');
+          }
+
+          const piece = boardState[y][x];
+          if (piece) {
+            const pieceDiv = document.createElement('div');
+            pieceDiv.classList.add('piece');
+            pieceDiv.classList.add(piece.toLowerCase() === 'r' ? 'red' : 'blue');
+
+            if ([RED_KING, BLUE_KING].includes(piece)) {
+              pieceDiv.classList.add('king');
+            }
+
+            cell.appendChild(pieceDiv);
+          }
+
+          cell.onclick = () => handleCellClick(x, y);
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function handleCellClick(x, y) {
+      const piece = boardState[y][x];
+
+      // If clicked on a valid move, move piece
+      if (selectedPiece && possibleMoves.some(([mx, my]) => mx === x && my === y)) {
+        const [sx, sy] = selectedPiece;
+        movePiece(sx, sy, x, y);
+        createBoard();
+        sendMove(sx, sy, x, y);
+        selectedPiece = null;
+        possibleMoves = [];
+        updateStatus(`Moved piece to (${x}, ${y}).`);
+        return;
+      }
+
+      // If clicked on own piece, select and show moves
+      if (piece && isMyTurn(piece)) {
+        selectedPiece = [x, y];
+        possibleMoves = getValidMoves(x, y);
+        createBoard();
+      } else {
+        // Deselect if click elsewhere
+        selectedPiece = null;
+        possibleMoves = [];
+        createBoard();
+      }
+    }
+
+    function isMyTurn(piece) {
+      return currentPlayerColor === 'red'
+        ? piece === RED || piece === RED_KING
+        : piece === BLUE || piece === BLUE_KING;
+    }
+
+    // Simplified move validation for internal use (already checked valid moves)
+    function validateMove(sx, sy, dx, dy) {
+      const valid = possibleMoves.some(([mx, my]) => mx === dx && my === dy);
+      return valid;
+    }
+
+    function movePiece(sx, sy, dx, dy) {
+      const piece = boardState[sy][sx];
+      boardState[sy][sx] = null;
+      boardState[dy][dx] = piece;
+
+      // King promotion
+      if (piece === RED && dy === 0) boardState[dy][dx] = RED_KING;
+      if (piece === BLUE && dy === 7) boardState[dy][dx] = BLUE_KING;
+
+      // Remove captured piece if move was a capture
+      if (Math.abs(dx - sx) === 2 && Math.abs(dy - sy) === 2) {
+        const midX = (sx + dx) / 2;
+        const midY = (sy + dy) / 2;
+        boardState[midY][midX] = null;
+      }
+
+      // TODO: Check for multi-captures here if you want to extend
+
+      // After move, switch turn (you can implement turn management here)
+    }
+
+    function sendMove(sx, sy, dx, dy) {
+      if (ws?.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'move', from: [sx, sy], to: [dx, dy] }));
+      }
+    }
+
+    function receiveMove({ from, to }) {
+      movePiece(from[0], from[1], to[0], to[1]);
+      createBoard();
+      updateStatus(`Opponent moved piece to (${to[0]}, ${to[1]}).`);
+    }
+
+    // ----- Networking -----
+    function connectWebSocket() {
+      if (ws) {
+        ws.close();
+      }
+      ws = new WebSocket(`wss://${location.host}/room/${roomId}`);
+
+      ws.onopen = () => {
+        updateStatus('Connected to game server.');
+      };
+
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'move') {
+          receiveMove(msg);
+        } else if (msg.type === 'info') {
+          updateStatus(msg.message);
+        }
+      };
+
+      ws.onclose = () => {
+        updateStatus('Disconnected from server.');
+      };
+
+      ws.onerror = () => {
+        updateStatus('WebSocket error.');
+      };
+    }
+
+    async function join() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert('Please enter your name.');
+        return;
+      }
+
+      const res = await fetch('/join', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name }),
+      });
+
+      const data = await res.json();
+      playerId = data.playerId;
+      playerNameDisplay.textContent = `Hello, ${name}!`;
+      joinBtn.style.display = 'none';
+      nameInput.style.display = 'none';
+      joinOptions.style.display = 'block';
+      updateStatus('');
+    }
+
+    async function automatch() {
+      const res = await fetch('/automatch', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ playerId }),
+      });
+
+      const data = await res.json();
+      if (data.matched) {
+        ({ roomId, color: currentPlayerColor } = data);
+        startGame(currentPlayerColor);
+        updateStatus(`Game started! You are playing as ${currentPlayerColor}.`);
+        newSameBtn.disabled = false;
+        newDiffBtn.disabled = false;
+      } else {
+        updateStatus('Waiting for another player...');
+      }
+    }
+
+    async function invite() {
+      const res = await fetch('/invite', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ inviterId: playerId }),
+      });
+
+      const data = await res.json();
+      const link = `${location.origin}${data.inviteLink}`;
+
+      // Create a copyable input field for the link
+      const linkBox = document.createElement('input');
+      linkBox.value = link;
+      linkBox.readOnly = true;
+      linkBox.style.width = '80%';
+      linkBox.style.marginTop = '1rem';
+      linkBox.style.fontSize = '1rem';
+      linkBox.style.textAlign = 'center';
+
+      // Add to page just below the Invite button
+      const joinOptionsDiv = document.getElementById('joinOptions');
+      // Remove any previous link boxes
+      const oldLinks = joinOptionsDiv.querySelectorAll('input[type="text"]');
+      oldLinks.forEach(el => el.remove());
+
+      joinOptionsDiv.appendChild(linkBox);
+      linkBox.select();
+      document.execCommand('copy');
+
+      alert('Invite link copied to clipboard!');
+    }
+
+    async function endGame() {
+      if (!roomId || !playerId) return;
+      await fetch('/end', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ playerId, roomId })
+      });
+      location.reload();
+    }
+
+    function startGame(color) {
+      initializeBoardState();
+      currentPlayerColor = color;
+      createBoard();
+      gameDiv.style.display = 'block';
+      joinOptions.style.display = 'none';
+      connectWebSocket();
+      selectedPiece = null;
+      possibleMoves = [];
+      updateStatus(`Your turn, playing as ${color}.`);
+    }
+
+    function updateStatus(msg) {
+      statusDiv.textContent = msg;
+    }
+
+    // New game handlers (basic reset for now)
+    newSameBtn.onclick = () => {
+      initializeBoardState();
+      createBoard();
+      updateStatus('New game started (same player).');
+    };
+
+    newDiffBtn.onclick = () => {
+      // Could redirect to join screen or reset
+      location.reload();
+    };
+
+    // ----- Bind Events -----
+    joinBtn.onclick = join;
+    automatchBtn.onclick = automatch;
+    inviteBtn.onclick = invite;
+    endBtn.onclick = endGame;
+
+  </script>
+</body>
+</html>
