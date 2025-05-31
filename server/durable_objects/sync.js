@@ -1,10 +1,10 @@
-// sync.js - sync logic every 5-10s using delta updates
-
 export class SyncManager {
-  constructor() {
+  constructor(state = {}, changes = {}) {
     this.lastSyncTimestamp = Date.now();
     this.dirty = false;
-    this.state = {}; // Store game state snapshot or diff here
+
+    this.state = state;   // Full game state (e.g., board, move history)
+    this.changes = changes; // Deltas (only modified keys since last sync)
   }
 
   markDirty() {
@@ -12,23 +12,44 @@ export class SyncManager {
   }
 
   updateState(newState) {
-    // Update internal state with newState diff
-    Object.assign(this.state, newState);
-    this.markDirty();
+    for (const key in newState) {
+      if (this.state[key] !== newState[key]) {
+        this.state[key] = newState[key];
+        this.changes[key] = newState[key];
+        this.markDirty();
+      }
+    }
   }
 
   shouldSync() {
     const now = Date.now();
-    return this.dirty && (now - this.lastSyncTimestamp) >= 5000;
+    return this.dirty && (now - this.lastSyncTimestamp >= 5000);
   }
 
   getDelta() {
-    // Return the delta (diff) to sync, here simplified as full state
-    return this.state;
+    return { ...this.changes };
+  }
+
+  getFullState() {
+    return { ...this.state };
   }
 
   synced() {
     this.lastSyncTimestamp = Date.now();
     this.dirty = false;
+    this.changes = {};
+  }
+
+  // 🆕 Serialize full state and changes
+  serialize() {
+    return {
+      state: this.state,
+      changes: this.changes,
+    };
+  }
+
+  // 🆕 Static method to restore from persisted data
+  static fromSerialized(data) {
+    return new SyncManager(data.state, data.changes);
   }
 }
