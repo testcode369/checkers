@@ -3,13 +3,13 @@ main = "src/index.js"
 compatibility_date = "2025-05-31"
 
 [[durable_objects]]
-name = "MY_DO_NAMESPACE"
+name = "Aavdk"
 class_name = "MyDurableObject"
 
 [[d1_databases]]
-binding = "MY_D1"
-database_name = "my_database"
+binding = "checkersdb"
+database_name = "checkers-db"
 
 [[kv_namespaces]]
-binding = "MY_KV"
-id = "<your-kv-namespace-id>"
+binding = "INVITES"
+id = "a32e202fea9e402b8b0557d6d73321d5"
