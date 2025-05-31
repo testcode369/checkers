@@ -38,11 +38,6 @@
         { "from": "Spectator", "to": "SpectatorManager" },
          { "from": "Sync", "to": "SyncManager" }
       ]
-    },
-    {
-      "tag": "v3",
-      "deleted_classes": [
-       "Spectator","Sync"]
     }
   ],
 
