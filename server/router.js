@@ -12,24 +12,24 @@ export async function handleRequest(request, env, ctx) {
   const pathname = url.pathname;
 
   // Matchmaking endpoints
-  if (request.method === 'POST' && pathname === '/api/join') {
+  if (request.method === 'POST' && pathname === '/join') {
     return handleJoin(request, env);
   }
 
-  if (request.method === 'POST' && pathname === '/api/automatch') {
+  if (request.method === 'POST' && pathname === '/automatch') {
     return handleAutomatch(request, env);
   }
 
-  if (request.method === 'POST' && pathname === '/api/invite') {
+  if (request.method === 'POST' && pathname === '/invite') {
     return handleInvite(request, env);
   }
 
-  if (request.method === 'GET' && pathname === '/api/accept-invite') {
+  if (request.method === 'GET' && pathname === '/accept-invite') {
     return handleAcceptInvite(request, env);
   }
 
   // Optional debug endpoint for room state
-  if (request.method === 'GET' && pathname.startsWith('/api/room-state/')) {
+  if (request.method === 'GET' && pathname.startsWith('/room-state/')) {
     const parts = pathname.split('/');
     const roomId = parts[parts.length - 1];
     const id = env.ROOM_DO.idFromName(roomId);
