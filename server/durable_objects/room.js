@@ -305,3 +305,4 @@ export class Room {
   }
 }
 
+export { Room as Room };
