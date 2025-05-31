@@ -8,4 +8,4 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   }
-}8
+}
