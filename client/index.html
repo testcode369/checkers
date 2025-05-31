@@ -365,7 +365,7 @@
         return;
       }
 
-      const res = await fetch('/join', {
+      const res = await fetch('/api/join', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ name }),
@@ -381,7 +381,7 @@
     }
 
     async function automatch() {
-      const res = await fetch('/automatch', {
+      const res = await fetch('/api/automatch', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ playerId }),
@@ -400,7 +400,7 @@
     }
 
     async function invite() {
-      const res = await fetch('/invite', {
+      const res = await fetch('/api/invite', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ inviterId: playerId }),
