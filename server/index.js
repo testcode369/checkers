@@ -1,7 +1,7 @@
 // index.js
 import { Router } from 'itty-router';
 import { nanoid } from 'nanoid';
-import { encodeInviteToken } from './utils/crypto.js';
+import { encodeInviteToken } from './crypto.js';
 
 // Durable Object classes
 import { Room } from './durable_objects/room.js';
