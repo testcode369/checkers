@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cloudflare Sync Server Test</title>
+<style>
+  body { font-family: sans-serif; margin: 2em; }
+  textarea { width: 100%; height: 100px; }
+  .output { margin-top: 1em; border: 1px solid #ccc; padding: 1em; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>Cloudflare Sync Server Test</h1>
+
+<label>Document ID:</label>
+<input id="docId" value="doc-123"><br><br>
+
+<label>Base Version:</label>
+<input id="baseVersion" type="number" value="0"><br><br>
+
+<label>Deltas (JSON):</label><br>
+<textarea id="deltas">[{"op":"add","key":"title","value":"Hello World"}]</textarea><br>
+
+<button onclick="sync()">Sync</button>
+<button onclick="kv()">Test KV</button>
+<button onclick="d1()">Test D1</button>
+
+<div class="output" id="output"></div>
+
+<script>
+  const endpoint = "https://<your-worker-subdomain>.workers.dev"; // replace with your actual endpoint!
+
+  async function sync() {
+    const docId = document.getElementById("docId").value;
+    const baseVersion = parseInt(document.getElementById("baseVersion").value, 10);
+    const deltas = JSON.parse(document.getElementById("deltas").value);
+
+    const res = await fetch(`${endpoint}/sync`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ docId, baseVersion, deltas })
+    });
+
+    const data = await res.json();
+    document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+
+    // Update base version if successful
+    if (data.newVersion) {
+      document.getElementById("baseVersion").value = data.newVersion;
+    }
+  }
+
+  async function kv() {
+    const res = await fetch(`${endpoint}/kv`);
+    const text = await res.text();
+    document.getElementById("output").textContent = text;
+  }
+
+  async function d1() {
+    const res = await fetch(`${endpoint}/d1`);
+    const data = await res.json();
+    document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+  }
+</script>
+
+</body>
+</html>
