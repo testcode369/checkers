@@ -88,4 +88,4 @@ export class SpectatorManager {
   }
 }
 
-export { SpectatorManager };
+
