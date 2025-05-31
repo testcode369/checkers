@@ -1,4 +1,3 @@
-// server/index.js
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import { handleRequest } from './router.js';
 
@@ -39,12 +38,32 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Try to serve static files first
+    // ✅ Handle WebSocket upgrade
+    if (url.pathname === "/ws" && request.headers.get("Upgrade") === "websocket") {
+      const [client, server] = Object.values(new WebSocketPair());
+
+      // Optional: store client in Durable Object or handle messages here
+      server.accept();
+
+      server.addEventListener("message", (event) => {
+        server.send(`Echo: ${event.data}`);
+      });
+
+      return new Response(null, {
+        status: 101,
+        webSocket: server
+      });
+    }
+
+    // ✅ Try static assets
     try {
-      const asset = await getAssetFromKV({ request, waitUntil: ctx.waitUntil }, { ASSET_NAMESPACE: env.__STATIC_CONTENT });
+      const asset = await getAssetFromKV(
+        { request, waitUntil: ctx.waitUntil },
+        { ASSET_NAMESPACE: env.__STATIC_CONTENT }
+      );
       return asset;
     } catch (err) {
-      // If static asset not found, fallback to router
+      // ✅ Fall back to app router
       return handleRequest(request, env, ctx);
     }
   },
