@@ -1,12 +1,16 @@
+// index.js
 import { Router } from 'itty-router';
 import { nanoid } from 'nanoid';
-import { encodeInviteToken } from './crypto.js';
+import { encodeInviteToken } from './utils/crypto.js';
+
+// Durable Object classes
 import { Room } from './durable_objects/room.js';
 import { SyncManager } from './durable_objects/sync.js';
 import { SpectatorManager } from './durable_objects/spectator.js';
 
 const router = Router();
 
+// JOIN endpoint
 router.post('/join', async (req, env) => {
   const { name } = await req.json();
   const playerId = nanoid();
@@ -19,6 +23,7 @@ router.post('/join', async (req, env) => {
   });
 });
 
+// AUTOMATCH endpoint
 router.post('/automatch', async (req, env) => {
   const { playerId } = await req.json();
   const waiting = await env.KV.get('waiting_player');
@@ -46,6 +51,7 @@ router.post('/automatch', async (req, env) => {
   return new Response(JSON.stringify({ matched: false }));
 });
 
+// INVITE endpoint
 router.post('/invite', async (req, env) => {
   const { inviterId } = await req.json();
   const token = encodeInviteToken(inviterId, env);
@@ -62,6 +68,7 @@ router.post('/invite', async (req, env) => {
   });
 });
 
+// ACCEPT INVITE endpoint
 router.get('/accept/:token', async ({ params }, env) => {
   const { token } = params;
   const inviterId = await env.INVITES.get(token);
@@ -94,6 +101,7 @@ router.get('/accept/:token', async ({ params }, env) => {
   });
 });
 
+// SPECTATE endpoint
 router.get('/spectate/:playerId', async ({ params }, env) => {
   const roomId = await env.KV.get(`player:${params.playerId}:room`);
   if (!roomId) {
@@ -110,6 +118,7 @@ router.get('/spectate/:playerId', async ({ params }, env) => {
   });
 });
 
+// END endpoint
 router.post('/end', async (req, env) => {
   const { playerId, roomId, winnerId } = await req.json();
 
@@ -128,16 +137,13 @@ router.post('/end', async (req, env) => {
   return new Response('Game ended', { status: 200 });
 });
 
+// Fallback for 404
 router.all('*', () => new Response('Not Found', { status: 404 }));
 
+// Exports for Durable Objects
+export { Room, SyncManager, SpectatorManager };
 
-export {
-    Room,
-    SyncManager,
-    SpectatorManager
-  }; 
-
+// Default Worker Export
 export default {
   fetch: (req, env, ctx) => router.handle(req, env, ctx),
-
 };
