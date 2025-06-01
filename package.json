@@ -1,0 +1,33 @@
+{
+  "name": "checkers-game",
+  "version": "1.0.0",
+  "description": "Real-time American Checkers game using Cloudflare Workers, Durable Objects, KV, and D1.",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "echo 'No build step needed.'"
+  },
+  "keywords": [
+    "checkers",
+    "cloudflare",
+    "durable-objects",
+    "d1",
+    "realtime",
+    "websocket",
+    "kv",
+    "multiplayer"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "itty-router": "^3.0.7",
+    "nanoid": "^4.0.2",
+    "@cloudflare/kv-asset-handler": "0.4.0"
+    
+  },
+  "devDependencies": {
+    "wrangler": "4"
+  },
+  "type": "module"
+}
