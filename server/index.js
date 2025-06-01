@@ -8,19 +8,13 @@ import { Room } from './durable_objects/room.js';
 import { SyncManager } from './durable_objects/sync.js';
 import { SpectatorManager } from './durable_objects/spectator.js';
 
+import { handleJoin, handleMove, handleSpectate } from './handlers.js';
+
 const router = Router();
 
 // JOIN endpoint
 router.post('/join', async (req, env) => {
-  const { name } = await req.json();
-  const playerId = nanoid();
-
-  await env.DB.prepare(`INSERT INTO players (id, name) VALUES (?, ?)`)
-    .bind(playerId, name).run();
-
-  return new Response(JSON.stringify({ playerId }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+return handleJoin(request, env, ctx);
 });
 
 
