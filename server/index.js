@@ -12,24 +12,17 @@ const router = Router();
 
 // JOIN endpoint
 router.post('/join', async (req, env) => {
-  const payload = await req.json();
-  const { playerId } = payload;
+  const { name } = await req.json();
+  const playerId = nanoid();
 
-  // Example: Insert player info to D1
-  const query = env.MY_D1.prepare('INSERT INTO players (id) VALUES (?)').bind(playerId);
-  await query.run();
+  await env.DB.prepare(`INSERT INTO players (id, name) VALUES (?, ?)`)
+    .bind(playerId, name).run();
 
-  // Example: create Durable Object stub for this player/game
-  const id = env.MY_DO_NAMESPACE.idFromName(playerId);
-  const stub = env.MY_DO_NAMESPACE.get(id);
-
-  // Forward request to Durable Object (optional)
-  const response = await stub.fetch(req);
-
-  return new Response(JSON.stringify({ message: "Player joined", playerId }), {
+  return new Response(JSON.stringify({ playerId }), {
     headers: { 'Content-Type': 'application/json' }
   });
 });
+
 
 // AUTOMATCH endpoint
 router.post('/automatch', async (req, env) => {
