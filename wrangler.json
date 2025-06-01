@@ -20,9 +20,6 @@
       "id": "a32e202fea9e402b8b0557d6d73321d5"
     }
   ],
-  "build": {
-    "command": "npm run build"
-  },
    "assets": {
     "directory": "public"
   }
