@@ -13,10 +13,25 @@ import { handleJoin, handleMove, handleSpectate } from './handlers.js';
 const router = Router();
 
 // JOIN endpoint
+// JOIN endpoint
 router.post('/join', async (req, env) => {
-return handleJoin(request, env, ctx);
-});
+  const { name } = await req.json();
+  const playerId = nanoid();
 
+  // Insert into players table
+  await env.DB.prepare(`
+    INSERT INTO players (id, name) VALUES (?, ?)
+  `).bind(playerId, name).run();
+
+  // Insert into join table
+  await env.DB.prepare(`
+    INSERT INTO join (player_id, joined_at) VALUES (?, CURRENT_TIMESTAMP)
+  `).bind(playerId).run();
+
+  return new Response(JSON.stringify({ playerId }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+});
 
 // AUTOMATCH endpoint
 router.post('/automatch', async (req, env) => {
