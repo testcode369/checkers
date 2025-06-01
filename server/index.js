@@ -139,7 +139,7 @@ router.post('/end', async (req, env) => {
 });
 
 // Fallback for 404
-router.all('*', () => new Response('Not Found', { status: 404 }));
+router.all('*', () => new Response('Not Found 4', { status: 404 }));
 
 // Exports for Durable Objects
 export { Room, SyncManager, SpectatorManager };
