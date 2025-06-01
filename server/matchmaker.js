@@ -5,7 +5,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (url.pathname === '/join' && request.method === 'POST') {
+    if (url.pathname === '/match' && request.method === 'POST') {
       const { name, id } = await request.json();
 
       if (QUEUE.length > 0) {
