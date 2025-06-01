@@ -6,9 +6,9 @@
   "compatibility_date": "2024-06-01",
   "workers_dev": true,
 
-  "site": {
-       "bucket": "./client"
-  },
+ "assets": {
+   "directory": "./client"
+ },
 
   "durable_objects": {
     "bindings": [
