@@ -9,6 +9,9 @@
  "assets": {
     "directory": "client"
   },
+  "site": {
+       "bucket": "./client"
+  },
 
   "durable_objects": {
     "bindings": [
