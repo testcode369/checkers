@@ -47,5 +47,5 @@ export async function handleRequest(request, env, ctx) {
     return new Request(fallbackUrl.toString(), request);
   }
 
-  return new Response('Not Found', { status: 404 });
+  return new Response('Not Found 3', { status: 404 });
 }
