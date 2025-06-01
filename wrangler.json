@@ -22,5 +22,9 @@
   ],
    "assets": {
     "directory": "public"
+  },
+  
+  "build": {
+    "command": "npm install"
   }
 }
